@@ -45,18 +45,18 @@ public class HTRegionManager extends RegionManager {
 
     @Override
     public void addRegion(ProtectedRegion region) {
-        if (region instanceof SuperRegion) {
+        if (region instanceof ProtectedChunkoidRegion) {
             this.regions.put(region.getId().toLowerCase(), region);
-            for (ChunkVector cv : ((SuperRegion) region).getChunkoids()) {
+            for (ChunkVector cv : ((ProtectedChunkoidRegion) region).getChunkoids()) {
                 Set<ProtectedRegion> ctr = chunkToRegions.get(cv);
                 if (ctr == null) {
                     ctr = chunkToRegions.put(cv, new HashSet<ProtectedRegion>());
                 }
                 ctr.add(region);
             }
-        } else if (region instanceof SuperRegion) {
+        } else if (region instanceof ProtectedChunkRegion) {
             this.regions.put(region.getId().toLowerCase(), region);
-            for (ChunkVector cv : ((SuperRegion) region).getPartialChunks()) {
+            for (ChunkVector cv : ((ProtectedChunkRegion) region).getPartialChunks()) {
                 Set<ProtectedRegion> ctr = chunkToRegions.get(cv);
                 if (ctr == null) {
                     ctr = new HashSet<>();

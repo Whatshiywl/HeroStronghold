@@ -166,7 +166,7 @@ public class Effect {
         } else if (r.isMember("all")) {
             return true;
         } else {
-            for (String s : r.getMembers()) {
+            for (String s : r.getAllMembers()) {
                 if (s.contains("sr:")) {
                     String superRegionName = s.replace("sr:", "");
                     SuperRegion sr = rm.getSuperRegion(superRegionName);
@@ -299,7 +299,7 @@ public class Effect {
         //Check and remove money from the player
         String playername = "";
         try {
-            playername = r.getOwners().get(0);
+            playername = r.getAllOwners().get(0);
         } catch (IndexOutOfBoundsException ioobe) {
             return;
         }
@@ -387,7 +387,7 @@ public class Effect {
         //Check and remove money from the player
         String playername = "";
         try {
-            playername = r.getOwners().get(0);
+            playername = r.getAllOwners().get(0);
         } catch (IndexOutOfBoundsException ioobe) {
             return;
         }
@@ -478,14 +478,14 @@ public class Effect {
         //Check and remove money from the player
         String playername = "";
         try {
-            playername = r.getOwners().get(0);
+            playername = r.getAllOwners().get(0);
         } catch (IndexOutOfBoundsException ioobe) {
             return false;
         }
         double output = rt.getMoneyOutput();
         if (output != 0 && HeroStronghold.econ != null) {
             Economy econ = HeroStronghold.econ;
-            if (r.getOwners().isEmpty()) {
+            if (r.getAllOwners().isEmpty()) {
                 return false;
             }
             if (output < 0  && econ.getBalance(playername) < Math.abs(output)) {
@@ -573,14 +573,14 @@ public class Effect {
         //Check and remove money from the player
         String playername = "";
         try {
-            playername = r.getOwners().get(0);
+            playername = r.getAllOwners().get(0);
         } catch (IndexOutOfBoundsException ioobe) {
             return false;
         }
         double output = rt.getMoneyOutput();
         if (output != 0 && HeroStronghold.econ != null) {
             Economy econ = HeroStronghold.econ;
-            if (r.getOwners().isEmpty()) {
+            if (r.getAllOwners().isEmpty()) {
                 return false;
             }
             if (output < 0  && econ.getBalance(playername) < Math.abs(output)) {

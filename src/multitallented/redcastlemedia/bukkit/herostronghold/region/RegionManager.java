@@ -24,21 +24,21 @@ import org.bukkit.inventory.ItemStack;
  * @author Multitallented
  */
 public class RegionManager {
-    private Map<Location, Region> liveRegions = new HashMap<Location, Region>();
-    private Map<Integer, Region> idRegions = new HashMap<Integer, Region>();
-    private ArrayList<Region> sortedRegions = new ArrayList<Region>();
-    private Map<String, SuperRegion> liveSuperRegions = new HashMap<String, SuperRegion>();
-    private ArrayList<SuperRegion> sortedSuperRegions = new ArrayList<SuperRegion>();
-    private Map<String, RegionType> regionTypes = new HashMap<String, RegionType>();
-    private Map<String, SuperRegionType> superRegionTypes = new HashMap<String, SuperRegionType>();
+    private Map<Location, Region> liveRegions = new HashMap<>();
+    private Map<Integer, Region> idRegions = new HashMap<>();
+    private ArrayList<Region> sortedRegions = new ArrayList<>();
+    private Map<String, SuperRegion> liveSuperRegions = new HashMap<>();
+    private ArrayList<SuperRegion> sortedSuperRegions = new ArrayList<>();
+    private Map<String, RegionType> regionTypes = new HashMap<>();
+    private Map<String, SuperRegionType> superRegionTypes = new HashMap<>();
     private HeroStronghold plugin;
     private final FileConfiguration config;
     private FileConfiguration dataConfig;
     private final ConfigManager configManager;
-    private HashMap<SuperRegion, HashSet<SuperRegion>> wars = new HashMap<SuperRegion, HashSet<SuperRegion>>();
-    private HashMap<String, PermSet> permSets = new HashMap<String, PermSet>();
-    private HashSet<String> possiblePermSets = new HashSet<String>();
-    private ArrayList<Region> sortedBuildRegions = new ArrayList<Region>();
+    private HashMap<SuperRegion, HashSet<SuperRegion>> wars = new HashMap<>();
+    private HashMap<String, PermSet> permSets = new HashMap<>();
+    private HashSet<String> possiblePermSets = new HashSet<>();
+    private ArrayList<Region> sortedBuildRegions = new ArrayList<>();
     
     
     public RegionManager(HeroStronghold plugin, FileConfiguration config) {

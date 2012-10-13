@@ -1,5 +1,7 @@
 package multitallented.redcastlemedia.bukkit.herostronghold.region;
 
+import com.sk89q.worldedit.BlockVector;
+import com.sk89q.worldguard.protection.regions.ProtectedCuboidRegion;
 import java.util.ArrayList;
 import org.bukkit.Location;
 
@@ -7,14 +9,15 @@ import org.bukkit.Location;
  *
  * @author Multitallented
  */
-public class Region {
+public class Region extends ProtectedCuboidRegion{
     private int id;
     private Location loc;
     private String type;
     private ArrayList<String> owners;
     private ArrayList<String> members;
     
-    public Region(int id, Location loc, String type, ArrayList<String> owners, ArrayList<String> members) {
+    public Region(int id, Location loc, String type, ArrayList<String> owners, ArrayList<String> members, BlockVector v1, BlockVector v2) {
+        super(id + "", v1, v2);
         this.id = id;
         this.loc = loc;
         this.type = type;
@@ -34,11 +37,11 @@ public class Region {
         return type;
     }
     
-    public ArrayList<String> getOwners() {
+    public ArrayList<String> getAllOwners() {
         return owners;
     }
     
-    public ArrayList<String> getMembers() {
+    public ArrayList<String> getAllMembers() {
         return members;
     }
     
@@ -66,10 +69,12 @@ public class Region {
         return owners.get(0).equals(name);
     }
     
+    @Override
     public boolean isOwner(String name) {
         return owners.contains(name);
     }
     
+    @Override
     public boolean isMember(String name) {
         return members.contains(name);
     }

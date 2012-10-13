@@ -1460,8 +1460,8 @@ public class HeroStronghold extends JavaPlugin {
                 foundRegion = true;
                 player.sendMessage(ChatColor.GRAY + "[HeroStronghold] Found Region ID: " + ChatColor.GOLD + r.getID());
                 String message = ChatColor.GRAY + "Type: " + r.getType();
-                if (!r.getOwners().isEmpty()) {
-                    message += ", Owned by: " + r.getOwners().get(0);
+                if (!r.getAllOwners().isEmpty()) {
+                    message += ", Owned by: " + r.getAllOwners().get(0);
                 }
                 player.sendMessage(message);
             }
@@ -1799,7 +1799,7 @@ public class HeroStronghold extends JavaPlugin {
                         player.sendMessage(ChatColor.GRAY + "[HeroStronghold] " + playername + " is already a member of this region.");
                         return true;
                     }
-                    if (r.isOwner(playername) && !(playername.equals(player.getName()) && r.getOwners().get(0).equals(player.getName()))) {
+                    if (r.isOwner(playername) && !(playername.equals(player.getName()) && r.getAllOwners().get(0).equals(player.getName()))) {
                         regionManager.setOwner(r, playername);
                     }
                     regionManager.setMember(r, playername);
@@ -1840,7 +1840,7 @@ public class HeroStronghold extends JavaPlugin {
                     player.sendMessage(ChatColor.GRAY + "[HeroStronghold] " + playername + " is already a member of this region.");
                     return true;
                 }
-                if (r.isOwner(playername) && !(playername.equals(player.getName()) && r.getOwners().get(0).equals(player.getName()))) {
+                if (r.isOwner(playername) && !(playername.equals(player.getName()) && r.getAllOwners().get(0).equals(player.getName()))) {
                     regionManager.setOwner(r, playername);
                 }
                 regionManager.setMember(r, playername);
@@ -2063,7 +2063,7 @@ public class HeroStronghold extends JavaPlugin {
                     player.sendMessage(ChatColor.GRAY + "[HeroStronghold] ==:|" + ChatColor.GOLD + r.getID() + " (" + r.getType() + ") " + ChatColor.GRAY + "|:==");
                     String message = ChatColor.GRAY + "Owners: " + ChatColor.GOLD;
                     int j = 0;
-                    for (String s : r.getOwners()) {
+                    for (String s : r.getAllOwners()) {
                         if (message.length() + s.length() + 2 > 55) {
                             player.sendMessage(message);
                             message = ChatColor.GOLD + "";
@@ -2075,13 +2075,13 @@ public class HeroStronghold extends JavaPlugin {
                             message += s + ", ";
                         }
                     }
-                    if (!r.getOwners().isEmpty()) {
+                    if (!r.getAllOwners().isEmpty()) {
                         player.sendMessage(message.substring(0, message.length() - 2));
                     } else {
                         player.sendMessage(message);
                     }
                     message = ChatColor.GRAY + "Members: " + ChatColor.GOLD;
-                    for (String s : r.getMembers()) {
+                    for (String s : r.getAllMembers()) {
                         if (message.length() + 2 + s.length() > 55) {
                             player.sendMessage(message);
                             message = ChatColor.GOLD + "";
@@ -2093,7 +2093,7 @@ public class HeroStronghold extends JavaPlugin {
                             message += s + ", ";
                         }
                     }
-                    if (!r.getMembers().isEmpty()) {
+                    if (!r.getAllMembers().isEmpty()) {
                         player.sendMessage(message.substring(0, message.length() - 2));
                     } else {
                         player.sendMessage(message);

@@ -17,8 +17,8 @@ import org.bukkit.plugin.PluginManager;
 public class CheckRegionTask implements Runnable {
     private final transient Server server;
     private final HeroStronghold hs;
-    private final Set<Location> regionsToDestroy = new HashSet<Location>();
-    private final HashSet<Region> regionsToCreate = new HashSet<Region>();
+    private final Set<Location> regionsToDestroy = new HashSet<>();
+    private final HashSet<Region> regionsToCreate = new HashSet<>();
     private int i= 0;
     
     public CheckRegionTask(Server server, HeroStronghold hs) {
@@ -79,7 +79,7 @@ public class CheckRegionTask implements Runnable {
         }
         regionsToDestroy.clear();
         for (Region r : regionsToCreate) {
-            hs.getRegionManager().addRegion(r.getLocation(), r.getType(), r.getOwners(), r.getMembers());
+            hs.getRegionManager().addRegion(r.getLocation(), r.getType(), r.getAllOwners(), r.getAllMembers());
         }
         regionsToCreate.clear();
     }

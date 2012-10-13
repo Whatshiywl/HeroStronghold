@@ -1,22 +1,16 @@
 package multitallented.redcastlemedia.bukkit.herostronghold.region;
 
-import com.sk89q.worldedit.BlockVector2D;
-import com.sk89q.worldedit.Vector;
-import com.sk89q.worldguard.protection.UnsupportedIntersectionException;
-import com.sk89q.worldguard.protection.regions.ProtectedRegion;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import org.bukkit.Location;
 
 /**
  *
  * @author Multitallented
  */
-public class SuperRegion extends ProtectedRegion {
+public class SuperRegion extends ProtectedChunkRegion {
     private String name;
     private final Location l;
     private final String type;
@@ -26,12 +20,9 @@ public class SuperRegion extends ProtectedRegion {
     private double taxes = 0;
     private double balance = 0;
     private LinkedList<Double> taxRevenue;
-    private Set<ChunkVector> partialChunks;
-    private Set<ChunkVector2D> intersectingChunks;
-    private static int BLOCKS_PER_PARTIAL_CHUNK = 4096;
     
-    public SuperRegion(String name, Location l, String type, List<String> owner, Map<String, List<String>> members, int power, double taxes, double balance, LinkedList<Double> taxRevenue, List<ChunkVector> partialChunks) {
-        super(name);
+    public SuperRegion(String name, Location l, String type, List<String> owner, Map<String, List<String>> members, int power, double taxes, double balance, LinkedList<Double> taxRevenue, List<ChunkVector2D> partialChunks, int maxY) {
+        super(name, partialChunks, maxY);
         this.name = name;
         this.l = l;
         this.type=type;
@@ -41,7 +32,6 @@ public class SuperRegion extends ProtectedRegion {
         this.taxes = taxes;
         this.balance = balance;
         this.taxRevenue = taxRevenue;
-        this.partialChunks = new HashSet<>(partialChunks);
     }
     
     public LinkedList<Double> getTaxRevenue() {
@@ -149,67 +139,5 @@ public class SuperRegion extends ProtectedRegion {
             }
         }
         return owners.size() + membersSize;
-    }
-
-    @Override
-    public List<BlockVector2D> getPoints() {
-        throw new UnsupportedOperationException("chunkoid regions do not support point lists");
-    }
-
-    @Override
-    public int volume() {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    public boolean contains(Vector vector) {
-        return partialChunks.contains(ChunkVector.fromVector(vector));
-    }
-
-    @Override
-    public String getTypeName() {
-        return "chunkoid";
-    }
-    
-    public Set<ChunkVector> getChunkoids() {
-        return partialChunks;
-    }
-    
-    public boolean containsAny(Set<ChunkVector> chunkoids) {
-        for (ChunkVector bv : chunkoids) {
-            if (partialChunks.contains(bv)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    @Override
-    public List<ProtectedRegion> getIntersectingRegions(List<ProtectedRegion> regions) throws UnsupportedIntersectionException {
-        List<ProtectedRegion> intersecting = new ArrayList<>();
-        for (ProtectedRegion region : regions) {
-            if (!intersectsBoundingBox(region)) {
-                continue;
-            }
-
-            if (region instanceof SuperRegion && this.containsAny(((SuperRegion) region).getChunkoids())) {
-                intersecting.add(region);
-            } else if ((region instanceof SuperRegion || (region instanceof Region) && containsAny(region.getPoints()))) {
-                //TODO implement this when I get Regions extended from ProtectedRegion
-                //TODO: Polygonol intersection may not work for wholly contained regions
-                intersecting.add(region);
-            } else {
-                throw new UnsupportedIntersectionException();
-            }
-        }
-        return intersecting;
-    }
-    
-    @Override
-    protected boolean intersectsEdges(ProtectedRegion region) {
-        if (region instanceof SuperRegion) {
-            return containsAny(((SuperRegion) region).getChunkoids());
-        }
-        return (containsAny(region.getPoints()));
     }
 }
