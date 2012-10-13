@@ -38,7 +38,7 @@ public class DailyTimerTask implements Runnable {
                 double total = 0;
                 double tax = sr.getTaxes();
                 if (tax != 0) {
-                    for (String member : sr.getMembers().keySet()) {
+                    for (String member : sr.getAllMembers().keySet()) {
                         double balance = econ.getBalance(member);
                         if (!sr.getMember(member).contains("notax") && balance > 0) {
                             if (balance - tax < 0) {

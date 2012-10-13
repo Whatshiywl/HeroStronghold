@@ -49,7 +49,7 @@ public class SendMessageThread implements Runnable {
         }*/
         SuperRegion sr = plugin.getRegionManager().getSuperRegion(channel);
         if (sr != null) {
-            for (String s : sr.getMembers().keySet()) {
+            for (String s : sr.getAllMembers().keySet()) {
                 Player p = plugin.getServer().getPlayer(s);
                 if (p != null) {
                     p.sendMessage(ChatColor.GRAY + "[" + ChatColor.GREEN + channel + ChatColor.GRAY + "]" + title + player.getDisplayName()
@@ -57,7 +57,7 @@ public class SendMessageThread implements Runnable {
                     i++;
                 }
             }
-            for (String s : sr.getOwners()) {
+            for (String s : sr.getAllOwners()) {
                 Player p = plugin.getServer().getPlayer(s);
                 if (p != null) {
                     p.sendMessage(ChatColor.GRAY + "[" + ChatColor.GREEN + channel + ChatColor.GRAY + "]" + title + player.getDisplayName()

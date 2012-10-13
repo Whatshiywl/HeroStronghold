@@ -30,7 +30,7 @@ import org.hidendra.bukkit.metrics.Metrics;
 
 public class HeroStronghold extends JavaPlugin {
     private PluginServerListener serverListener;
-    private Logger log;
+    private static final Logger log = Logger.getLogger("Minecraft");
     protected FileConfiguration config;
     private RegionManager regionManager;
     private RegionBlockListener blockListener;
@@ -38,15 +38,14 @@ public class HeroStronghold extends JavaPlugin {
     public static Permission perms;
     private RegionEntityListener regionEntityListener;
     private RegionPlayerInteractListener dpeListener;
-    private Map<String, String> pendingInvites = new HashMap<String, String>();
+    private Map<String, String> pendingInvites = new HashMap<>();
     private static ConfigManager configManager;
-    private Map<String, List<String>> pendingCharters = new HashMap<String, List<String>>();
+    private Map<String, List<String>> pendingCharters = new HashMap<>();
     public static Heroes heroes = null;
-    private HashSet<String> effectCommands = new HashSet<String>();
+    private HashSet<String> effectCommands = new HashSet<>();
     
     @Override
     public void onDisable() {
-        log = Logger.getLogger("Minecraft");
         log.info("[HeroStronghold] is now disabled!");
     }
 
@@ -85,7 +84,6 @@ public class HeroStronghold extends JavaPlugin {
         pm.registerEvents(dpeListener, this);
         
         pm.registerEvents(new CustomListener(this), this);
-        log = Logger.getLogger("Minecraft");
         
         //Check for Heroes
         log.info("[HeroStronghold] is looking for Heroes...");
@@ -329,7 +327,7 @@ public class HeroStronghold extends JavaPlugin {
             }
             
             //Add the charter
-            List<String> tempList = new ArrayList<String>();
+            List<String> tempList = new ArrayList<>();
             tempList.add(args[1]);
             tempList.add(player.getName());
             pendingCharters.put(args[2].toLowerCase(), tempList);
@@ -521,7 +519,7 @@ public class HeroStronghold extends JavaPlugin {
             ArrayList<ItemStack> requirements = currentRegionType.getRequirements();
             Map<Integer, Integer> reqMap = null;
             if (!requirements.isEmpty()) {
-                reqMap = new HashMap<Integer, Integer>();
+                reqMap = new HashMap<>();
                 for (ItemStack currentIS : requirements) {
                     reqMap.put(new Integer(currentIS.getTypeId()), new Integer(currentIS.getAmount()));
                 }
@@ -594,7 +592,7 @@ public class HeroStronghold extends JavaPlugin {
             //Create chest at players feet for tracking reagents and removing upkeep items
             currentBlock.setType(Material.CHEST);
             
-            ArrayList<String> owners = new ArrayList<String>();
+            ArrayList<String> owners = new ArrayList<>();
             owners.add(player.getName());
             if (costCheck > 0) {
                 econ.withdrawPlayer(player.getName(), costCheck);
@@ -692,7 +690,7 @@ public class HeroStronghold extends JavaPlugin {
                 
             }
 
-            Map<String, List<String>> members = new HashMap<String, List<String>>();
+            Map<String, List<String>> members = new HashMap<>();
             int currentCharter = currentRegionType.getCharter();
             //Make sure the super-region has a valid charter
             if (!HeroStronghold.perms.has(player, "herostronghold.admin")) {
@@ -712,7 +710,7 @@ public class HeroStronghold extends JavaPlugin {
                         } else {
                             int i =0;
                             for (String s : pendingCharters.get(args[2])) {
-                                ArrayList<String> tempArray = new ArrayList<String>();
+                                ArrayList<String> tempArray = new ArrayList<>();
                                 tempArray.add("member");
                                 if (i > 2) {
                                     members.put(s, tempArray);
@@ -739,7 +737,7 @@ public class HeroStronghold extends JavaPlugin {
                         } else {
                             int i =0;
                             for (String s : pendingCharters.get(args[2])) {
-                                ArrayList<String> tempArray = new ArrayList<String>();
+                                ArrayList<String> tempArray = new ArrayList<>();
                                 tempArray.add("member");
                                 if (i > 2) {
                                     members.put(s, tempArray);
@@ -755,7 +753,7 @@ public class HeroStronghold extends JavaPlugin {
             }
             
             Map<String, Integer> requirements = currentRegionType.getRequirements();
-            HashMap<String, Integer> req = new HashMap<String, Integer>();
+            HashMap<String, Integer> req = new HashMap<>();
             for (String s : currentRegionType.getRequirements().keySet()) {
                 req.put(new String(s), new Integer(requirements.get(s)));
             }
@@ -764,8 +762,9 @@ public class HeroStronghold extends JavaPlugin {
             List<String> children = currentRegionType.getChildren();
             if (children != null) {
                 for (String s : children) {
-                    if (!req.containsKey(s))
+                    if (!req.containsKey(s)) {
                         req.put(new String(s), 1);
+                    }
                 }
             }
             
@@ -777,7 +776,7 @@ public class HeroStronghold extends JavaPlugin {
             
             
             
-            List<String> quietDestroy = new ArrayList<String>();
+            List<String> quietDestroy = new ArrayList<>();
             int radius = (int) currentRegionType.getRawRadius();
             
             
@@ -875,17 +874,19 @@ public class HeroStronghold extends JavaPlugin {
             }
             
             //Assimulate any child super regions
-            List<String> owners = new ArrayList<String>();
+            List<String> owners = new ArrayList<>();
             double balance = 0.0;
             for (String s : quietDestroy) {
                 SuperRegion sr = regionManager.getSuperRegion(s);
-                for (String so : sr.getOwners()) {
-                    if (!owners.contains(so))
+                for (String so : sr.getAllOwners()) {
+                    if (!owners.contains(so)) {
                         owners.add(so);
+                    }
                 }
-                for (String sm : sr.getMembers().keySet()) {
-                    if (!members.containsKey(sm) && sr.getMember(sm).contains("member"))
+                for (String sm : sr.getAllMembers().keySet()) {
+                    if (!members.containsKey(sm) && sr.getMember(sm).contains("member")) {
                         members.put(sm, sr.getMember(sm));
+                    }
                 }
                 balance += sr.getBalance();
             }
@@ -1221,8 +1222,9 @@ public class HeroStronghold extends JavaPlugin {
             //Send an invite
             pendingInvites.put(invitee.getName(), args[2]);
             player.sendMessage(ChatColor.GRAY + "[HeroStronghold] You have invited " + ChatColor.GOLD + invitee.getDisplayName() + ChatColor.GRAY + " to join " + ChatColor.GOLD + args[2]);
-            if (invitee != null)
+            if (invitee != null) {
                 invitee.sendMessage(ChatColor.GOLD + "[HeroStronghold] You have been invited to join " + args[2] + ". /hs accept " + args[2]);
+            }
             return true;
         } else if (args.length > 1 && args[0].equalsIgnoreCase("accept")) {
             //Check if player has a pending invite to that super-region
@@ -1246,18 +1248,18 @@ public class HeroStronghold extends JavaPlugin {
             }
             
             //Add the player to the super region
-            ArrayList<String> perm = new ArrayList<String>();
+            ArrayList<String> perm = new ArrayList<>();
             perm.add("member");
             regionManager.setMember(sr, player.getName(), perm);
             pendingInvites.remove(player.getName());
             player.sendMessage(ChatColor.GOLD + "[HeroStronghold] Welcome to " + args[1]);
-            for (String s : sr.getMembers().keySet()) {
+            for (String s : sr.getAllMembers().keySet()) {
                 Player p = getServer().getPlayer(s);
                 if (p != null) {
                     p.sendMessage(ChatColor.GOLD + playername + " has joined " + args[1]);
                 }
             }
-            for (String s : sr.getOwners()) {
+            for (String s : sr.getAllOwners()) {
                 Player p = getServer().getPlayer(s);
                 if (p != null) {
                     p.sendMessage(ChatColor.GOLD + playername + " has joined " + args[1]);
@@ -1304,15 +1306,16 @@ public class HeroStronghold extends JavaPlugin {
             }
             
             regionManager.removeMember(sr, playername);
-            if (p != null)
+            if (p != null) {
                 p.sendMessage(ChatColor.GOLD + "[HeroStronghold] You are now an owner of " + args[2]);
-            for (String s : sr.getMembers().keySet()) {
+            }
+            for (String s : sr.getAllMembers().keySet()) {
                 Player pl = getServer().getPlayer(s);
                 if (pl != null) {
                     pl.sendMessage(ChatColor.GOLD + playername + " is now an owner of " + args[2]);
                 }
             }
-            for (String s : sr.getOwners()) {
+            for (String s : sr.getAllOwners()) {
                 Player pl = getServer().getPlayer(s);
                 if (pl != null) {
                     pl.sendMessage(ChatColor.GOLD + playername + " is now an owner of " + args[2]);
@@ -1354,13 +1357,13 @@ public class HeroStronghold extends JavaPlugin {
                     regionManager.setOwner(sr, playername);
                 }
                 player.sendMessage(ChatColor.GRAY + "[HeroStronghold] You have left " + args[2]);
-                for (String s : sr.getMembers().keySet()) {
+                for (String s : sr.getAllMembers().keySet()) {
                     Player pl = getServer().getPlayer(s);
                     if (pl != null) {
                         pl.sendMessage(ChatColor.GOLD + playername + " left " + args[2]);
                     }
                 }
-                for (String s : sr.getOwners()) {
+                for (String s : sr.getAllOwners()) {
                     Player pl = getServer().getPlayer(s);
                     if (pl != null) {
                         pl.sendMessage(ChatColor.GOLD + playername + " left " + args[2]);
@@ -1384,16 +1387,17 @@ public class HeroStronghold extends JavaPlugin {
             } else {
                 return true;
             }
-            if (p != null)
+            if (p != null) {
                 p.sendMessage(ChatColor.GRAY + "[HeroStronghold] You are no longer a member of " + args[2]);
+            }
             
-            for (String s : sr.getMembers().keySet()) {
+            for (String s : sr.getAllMembers().keySet()) {
                 Player pl = getServer().getPlayer(s);
                 if (pl != null) {
                     pl.sendMessage(ChatColor.GOLD + playername + " was removed from " + args[2]);
                 }
             }
-            for (String s : sr.getOwners()) {
+            for (String s : sr.getAllOwners()) {
                 Player pl = getServer().getPlayer(s);
                 if (pl != null) {
                     pl.sendMessage(ChatColor.GOLD + playername + " was removed from " + args[2]);
@@ -1436,15 +1440,17 @@ public class HeroStronghold extends JavaPlugin {
                 perm.remove(args[2]);
                 regionManager.setMember(sr, playername, perm);
                 player.sendMessage(ChatColor.GRAY + "[HeroStronghold] Removed perm " + args[2] + " for " + args[1] + " in " + args[3]);
-                if (p != null)
+                if (p != null) {
                     p.sendMessage(ChatColor.GRAY + "[HeroStronghold] Your perm " + args[2] + " was revoked in " + args[3]);
+                }
                 return true;
             } else {
                 perm.add(args[2]);
                 regionManager.setMember(sr, playername, perm);
                 player.sendMessage(ChatColor.GRAY + "[HeroStronghold] Added perm " + args[2] + " for " + args[1] + " in " + args[3]);
-                if (p != null)
+                if (p != null) {
                     p.sendMessage(ChatColor.GRAY + "[HeroStronghold] You were granted permission " + args[2] + " in " + args[3]);
+                }
                 return true;
             }
         } else if (args.length > 0 && args[0].equalsIgnoreCase("whatshere")) {
@@ -1463,8 +1469,8 @@ public class HeroStronghold extends JavaPlugin {
             for (SuperRegion sr : regionManager.getContainingSuperRegions(loc)) {
                 player.sendMessage(ChatColor.GRAY + "[HeroStronghold] Found Super-Region named: " + ChatColor.GOLD + sr.getName());
                 String message = ChatColor.GRAY + "Type: " + sr.getType();
-                if (!sr.getOwners().isEmpty()) {
-                    message += ", Owned by: " + sr.getOwners().get(0);
+                if (!sr.getAllOwners().isEmpty()) {
+                    message += ", Owned by: " + sr.getAllOwners().get(0);
                 }
                 player.sendMessage(message);
             }
@@ -1968,7 +1974,7 @@ public class HeroStronghold extends JavaPlugin {
             }
             
             //Check if owner or admin of that region
-            if ((perms == null || !perms.has(player, "herostronghold.admin")) && (sr.getOwners().isEmpty() || !sr.getOwners().contains(player.getName()))) {
+            if ((perms == null || !perms.has(player, "herostronghold.admin")) && (sr.getAllOwners().isEmpty() || !sr.getOwners().contains(player.getName()))) {
                 player.sendMessage(ChatColor.GRAY + "[HeroStronghold] You are not the owner of that region.");
                 return true;
             }
@@ -2044,7 +2050,7 @@ public class HeroStronghold extends JavaPlugin {
             }
             
             regionManager.destroySuperRegion(args[1], false);
-            regionManager.addSuperRegion(args[2], sr.getLocation(), sr.getType(), sr.getOwners(), sr.getMembers(), sr.getPower(), sr.getBalance());
+            regionManager.addSuperRegion(args[2], sr.getLocation(), sr.getType(), sr.getAllOwners(), sr.getAllMembers(), sr.getPower(), sr.getBalance());
             player.sendMessage(ChatColor.GOLD + "[HeroStronghold] " + args[1] + " is now " + args[2]);
             return true;
         } else if (args.length > 0 && (args[0].equalsIgnoreCase("show"))) {
@@ -2132,7 +2138,7 @@ public class HeroStronghold extends JavaPlugin {
                 }
                 String message = ChatColor.GRAY + "Owners: " + ChatColor.GOLD;
                 int j = 0;
-                for (String s : sr.getOwners()) {
+                for (String s : sr.getAllOwners()) {
                     if (message.length() + s.length() + 2 > 55) {
                         player.sendMessage(message);
                         message = ChatColor.GOLD + "";
@@ -2144,13 +2150,13 @@ public class HeroStronghold extends JavaPlugin {
                         message += s + ", ";
                     }
                 }
-                if (!sr.getOwners().isEmpty()) {
+                if (!sr.getAllOwners().isEmpty()) {
                     player.sendMessage(message.substring(0, message.length() - 2));
                 } else {
                     player.sendMessage(message);
                 }
                 message = ChatColor.GRAY + "Members: " + ChatColor.GOLD;
-                for (String s : sr.getMembers().keySet()) {
+                for (String s : sr.getAllMembers().keySet()) {
                     if (message.length() + 2 + s.length() > 55) {
                         player.sendMessage(message);
                         message = ChatColor.GOLD + "";
@@ -2162,7 +2168,7 @@ public class HeroStronghold extends JavaPlugin {
                         message += s + ", ";
                     }
                 }
-                if (!sr.getMembers().isEmpty()) {
+                if (!sr.getAllMembers().isEmpty()) {
                     player.sendMessage(message.substring(0, message.length() - 2));
                 } else {
                     player.sendMessage(message);
@@ -2181,7 +2187,7 @@ public class HeroStronghold extends JavaPlugin {
                         message += s + ", ";
                     }
                 }
-                if (!sr.getOwners().isEmpty()) {
+                if (!sr.getAllOwners().isEmpty()) {
                     player.sendMessage(message.substring(0, message.length() - 2));
                 } else {
                     player.sendMessage(message);
@@ -2268,8 +2274,9 @@ public class HeroStronghold extends JavaPlugin {
         RegisteredServiceProvider<Economy> rsp = getServer().getServicesManager().getRegistration(Economy.class);
         if (rsp != null) {
             econ = rsp.getProvider();
-            if (econ != null)
+            if (econ != null) {
                 System.out.println("[HeroStronghold] Hooked into " + econ.getName());
+            }
         }
         return econ != null;
     }
@@ -2278,8 +2285,9 @@ public class HeroStronghold extends JavaPlugin {
         RegisteredServiceProvider<Permission> permissionProvider = getServer().getServicesManager().getRegistration(net.milkbowl.vault.permission.Permission.class);
         if (permissionProvider != null) {
             perms = permissionProvider.getProvider();
-            if (perms != null)
+            if (perms != null) {
                 System.out.println("[HeroStronghold] Hooked into " + perms.getName());
+            }
         }
         return (perms != null);
     }
