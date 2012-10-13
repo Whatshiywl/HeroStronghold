@@ -4,6 +4,7 @@ import com.sk89q.worldedit.BlockVector2D;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldguard.protection.UnsupportedIntersectionException;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -167,11 +168,48 @@ public class SuperRegion extends ProtectedRegion {
 
     @Override
     public String getTypeName() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return "chunkoid";
+    }
+    
+    public Set<ChunkVector> getChunkoids() {
+        return partialChunks;
+    }
+    
+    public boolean containsAny(Set<ChunkVector> chunkoids) {
+        for (ChunkVector bv : chunkoids) {
+            if (partialChunks.contains(bv)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override
-    public List<ProtectedRegion> getIntersectingRegions(List<ProtectedRegion> list) throws UnsupportedIntersectionException {
-        throw new UnsupportedOperationException("Not supported yet.");
+    public List<ProtectedRegion> getIntersectingRegions(List<ProtectedRegion> regions) throws UnsupportedIntersectionException {
+        List<ProtectedRegion> intersecting = new ArrayList<>();
+        for (ProtectedRegion region : regions) {
+            if (!intersectsBoundingBox(region)) {
+                continue;
+            }
+
+            if (region instanceof SuperRegion && this.containsAny(((SuperRegion) region).getChunkoids())) {
+                intersecting.add(region);
+            } else if ((region instanceof SuperRegion || (region instanceof Region) && containsAny(region.getPoints()))) {
+                //TODO implement this when I get Regions extended from ProtectedRegion
+                //TODO: Polygonol intersection may not work for wholly contained regions
+                intersecting.add(region);
+            } else {
+                throw new UnsupportedIntersectionException();
+            }
+        }
+        return intersecting;
+    }
+    
+    @Override
+    protected boolean intersectsEdges(ProtectedRegion region) {
+        if (region instanceof SuperRegion) {
+            return containsAny(((SuperRegion) region).getChunkoids());
+        }
+        return (containsAny(region.getPoints()));
     }
 }
