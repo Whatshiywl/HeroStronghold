@@ -1,5 +1,7 @@
 package multitallented.redcastlemedia.bukkit.herostronghold.region;
 
+import com.sk89q.worldedit.BlockVector;
+import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
 import java.io.File;
 import java.util.*;
 import java.util.logging.Logger;
@@ -23,7 +25,7 @@ import org.bukkit.inventory.ItemStack;
  *
  * @author Multitallented
  */
-public class RegionManager {
+public class RegionManager extends HTRegionManager {
     private Map<Location, Region> liveRegions = new HashMap<>();
     private Map<Integer, Region> idRegions = new HashMap<>();
     private ArrayList<Region> sortedRegions = new ArrayList<>();
@@ -50,10 +52,12 @@ public class RegionManager {
         load();
     }
     
-    public void reload() {   
+    public void reload() {
+        //unload();
         load();
     }
-    private void load() {
+    @Override
+    public void load() {
         permSets = PermSet.loadPermSets(plugin);
         for (String s : permSets.keySet()) {
             possiblePermSets.add(s);
@@ -150,23 +154,30 @@ public class RegionManager {
                     ArrayList<String> owners = (ArrayList<String>) dataConfig.getStringList("owners");
                     ArrayList<String> members = (ArrayList<String>) dataConfig.getStringList("members");
                     if (owners == null) {
-                        owners = new ArrayList<String>();
+                        owners = new ArrayList<>();
                     }
                     if (members == null) {
-                        members = new ArrayList<String>();
+                        members = new ArrayList<>();
                     }
                     if (location != null && type != null) {
-                        try {
-                            location.getBlock().getTypeId();
-                            getRegionType(type).getRadius();
-                            liveRegions.put(location, new Region(Integer.parseInt(regionFile.getName().replace(".yml", "")), location, type, owners, members));
-
-                            sortedRegions.add(liveRegions.get(location));
-                            sortedBuildRegions.add(liveRegions.get(location));
-                            idRegions.put(liveRegions.get(location).getID(), liveRegions.get(location));
-                        } catch (NullPointerException npe) {
+                        if (location.getBlock() == null || getRegionType(type) == null) {
                             System.out.println("[HeroStronghold] failed to load data from " + regionFile.getName());
+                            continue;
                         }
+                        int rawRadius = getRegionType(type).getRawRadius();
+                        BlockVector v1 = new BlockVector(location.getX() + rawRadius, location.getY() + rawRadius, location.getZ() + rawRadius);
+                        BlockVector v2 = new BlockVector(location.getX() - rawRadius, location.getY() - rawRadius, location.getZ() - rawRadius);
+                        int id = Integer.parseInt(regionFile.getName().replace(".yml", ""));
+                        super.addRegion(new Region(id, location, type, owners, members, v1, v2, id + ""));
+                        int rawBuildRadius = getRegionType(type).getRawBuildRadius();
+                        v1 = new BlockVector(location.getX() + rawBuildRadius, location.getY() + rawBuildRadius, location.getZ() + rawBuildRadius);
+                        v2 = new BlockVector(location.getX() - rawBuildRadius, location.getY() - rawBuildRadius, location.getZ() - rawBuildRadius);
+                        super.addRegion(new Region(id, location, type, owners, members, v1, v2, id + "build"));
+                        //liveRegions.put(location, new Region(Integer.parseInt(regionFile.getName().replace(".yml", "")), location, type, owners, members, v1, v2));
+
+                        //sortedRegions.add(liveRegions.get(location));
+                        //sortedBuildRegions.add(liveRegions.get(location));
+                        //idRegions.put(liveRegions.get(location).getID(), liveRegions.get(location));
                     }
                 }
             } catch (Exception e) {
@@ -174,7 +185,7 @@ public class RegionManager {
                 System.out.println(e.getStackTrace());
             }
         }
-        if (sortedRegions.size() > 1) {
+        /*if (sortedRegions.size() > 1) {
             Collections.sort(sortedRegions, new Comparator<Region>() {
 
                 @Override
@@ -191,7 +202,7 @@ public class RegionManager {
                     return (int) (-1 *(o1.getLocation().getX() + getRegionType(o1.getType()).getRawBuildRadius() - (o2.getLocation().getX() + getRegionType(o2.getType()).getRawBuildRadius())));
                 }
             });
-        }
+        }*/
         
         //Load super regions
         File sRegionFolder = new File(plugin.getDataFolder(), "superregions"); // Setup the Data Folder if it doesn't already exist
@@ -232,9 +243,11 @@ public class RegionManager {
                         }
                     }
                     if (location != null && type != null) {
-                        liveSuperRegions.put(name, new SuperRegion(name, location, type, owners, members, power, taxes, balance, taxRevenue));
+                        //TODO fix this null
+                        super.addRegion(new SuperRegion(name, location, type, owners, members, power, taxes, balance, taxRevenue, null, 256));
+                        //liveSuperRegions.put(name, new SuperRegion(name, location, type, owners, members, power, taxes, balance, taxRevenue));
                         
-                        sortedSuperRegions.add(liveSuperRegions.get(name));
+                        //sortedSuperRegions.add(liveSuperRegions.get(name));
                     }
                 }
             } catch (Exception e) {
@@ -242,7 +255,7 @@ public class RegionManager {
                 e.printStackTrace();
             }
         }
-        if (sortedSuperRegions.size() > 1) {
+        /*if (sortedSuperRegions.size() > 1) {
             if (sortedSuperRegions.size() > 1) {
                 Collections.sort(sortedSuperRegions, new Comparator<SuperRegion>() {
 
@@ -252,7 +265,7 @@ public class RegionManager {
                     }
                 });
             }
-        }
+        }*/
         
         
         FileConfiguration warConfig = new YamlConfiguration();

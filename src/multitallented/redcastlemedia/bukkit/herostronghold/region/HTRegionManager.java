@@ -1,6 +1,12 @@
 package multitallented.redcastlemedia.bukkit.herostronghold.region;
 
-import java.io.IOException;
+import com.sk89q.worldedit.Vector;
+import com.sk89q.worldguard.LocalPlayer;
+import com.sk89q.worldguard.protection.ApplicableRegionSet;
+import com.sk89q.worldguard.protection.UnsupportedIntersectionException;
+import com.sk89q.worldguard.protection.databases.ProtectionDatabaseException;
+import com.sk89q.worldguard.protection.regions.GlobalProtectedRegion;
+import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -10,17 +16,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.sk89q.worldedit.Vector;
-import com.sk89q.worldguard.LocalPlayer;
-import com.sk89q.worldguard.protection.ApplicableRegionSet;
-import com.sk89q.worldguard.protection.UnsupportedIntersectionException;
-import com.sk89q.worldguard.protection.databases.ProtectionDatabase;
-import com.sk89q.worldguard.protection.databases.ProtectionDatabaseException;
-import com.sk89q.worldguard.protection.managers.RegionManager;
-import com.sk89q.worldguard.protection.regions.GlobalProtectedRegion;
-import com.sk89q.worldguard.protection.regions.ProtectedRegion;
-
-public class HTRegionManager extends RegionManager {
+public class HTRegionManager {
 
     /**
      * List of protected regions.
@@ -28,22 +24,18 @@ public class HTRegionManager extends RegionManager {
     private Map<String, ProtectedRegion> regions;
     private Map<ChunkVector, Set<ProtectedRegion>> chunkToRegions = new HashMap<>();
 
-    public HTRegionManager(ProtectionDatabase loader) throws IOException {
-        super(loader);
+    public HTRegionManager() {
         regions = new HashMap<>();
     }
 
-    @Override
     public Map<String, ProtectedRegion> getRegions() {
         return regions;
     }
 
-    @Override
     public void setRegions(Map<String, ProtectedRegion> regions) {
         this.regions = new HashMap<>(regions);
     }
 
-    @Override
     public void addRegion(ProtectedRegion region) {
         if (region instanceof ProtectedChunkoidRegion) {
             this.regions.put(region.getId().toLowerCase(), region);
@@ -76,22 +68,19 @@ public class HTRegionManager extends RegionManager {
         }
     }
 
-    @Override
     public boolean hasRegion(String id) {
         return regions.containsKey(id.toLowerCase());
     }
 
-    @Override
     public ProtectedRegion getRegion(String id) {
         return regions.get(id.toLowerCase());
     }
 
-    @Override
     public void removeRegion(String id) {
         ProtectedRegion region = regions.remove(id.toLowerCase());
 
         if (region instanceof ProtectedChunkoidRegion) {
-            List<String> removeRegions = new ArrayList<String>();
+            List<String> removeRegions = new ArrayList<>();
             Iterator<ProtectedRegion> iter = regions.values().iterator();
             while (iter.hasNext()) {
                 ProtectedRegion curRegion = iter.next();
@@ -180,7 +169,6 @@ public class HTRegionManager extends RegionManager {
         addRegion(region);
     }
 
-    @Override
     public ApplicableRegionSet getApplicableRegions(Vector pt) {
         Collection<ProtectedRegion> appRegions = this.chunkToRegions.get(ChunkVector.fromVector(pt));
         if (appRegions == null) {
@@ -189,7 +177,6 @@ public class HTRegionManager extends RegionManager {
         return new ApplicableRegionSet(appRegions, regions.get("__global__"));
     }
 
-    @Override
     public ApplicableRegionSet getApplicableRegions(ProtectedRegion region) {
         List<ProtectedRegion> appRegions = new ArrayList<>(regions.values());
         List<ProtectedRegion> intersecting;
@@ -201,7 +188,6 @@ public class HTRegionManager extends RegionManager {
         return new ApplicableRegionSet(intersecting, regions.get("__global__"));
     }
 
-    @Override
     public List<String> getApplicableRegionsIDs(Vector pt) {
         List<String> ids = new ArrayList<>();
         for (ProtectedRegion pr : chunkToRegions.get(ChunkVector.fromVector(pt))) {
@@ -210,7 +196,6 @@ public class HTRegionManager extends RegionManager {
         return ids;
     }
 
-    @Override
     public boolean overlapsUnownedRegion(ProtectedRegion region, LocalPlayer player) {
         List<ProtectedRegion> appRegions = new ArrayList<>();
 
@@ -232,12 +217,10 @@ public class HTRegionManager extends RegionManager {
         return intersectRegions.size() > 0;
     }
 
-    @Override
     public int size() {
         return regions.size();
     }
 
-    @Override
     public int getRegionCountOfPlayer(LocalPlayer player) {
         int count = 0;
 
@@ -250,9 +233,7 @@ public class HTRegionManager extends RegionManager {
         return count;
     }
     
-    @Override
-    public void load() throws ProtectionDatabaseException {
-        super.load();
+    public void load() {
         for (ProtectedRegion region : regions.values()) {
             if (region instanceof ProtectedChunkoidRegion) {
                 for (ChunkVector cv : ((ProtectedChunkoidRegion) region).getChunkoids()) {

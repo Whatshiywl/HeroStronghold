@@ -16,8 +16,8 @@ public class Region extends ProtectedCuboidRegion{
     private ArrayList<String> owners;
     private ArrayList<String> members;
     
-    public Region(int id, Location loc, String type, ArrayList<String> owners, ArrayList<String> members, BlockVector v1, BlockVector v2) {
-        super(id + "", v1, v2);
+    public Region(int id, Location loc, String type, ArrayList<String> owners, ArrayList<String> members, BlockVector v1, BlockVector v2, String name) {
+        super(name, v1, v2);
         this.id = id;
         this.loc = loc;
         this.type = type;
