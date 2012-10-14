@@ -5,8 +5,8 @@ import com.sk89q.worldguard.LocalPlayer;
 import com.sk89q.worldguard.protection.ApplicableRegionSet;
 import com.sk89q.worldguard.protection.UnsupportedIntersectionException;
 import com.sk89q.worldguard.protection.databases.ProtectionDatabaseException;
-import com.sk89q.worldguard.protection.regions.GlobalProtectedRegion;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
+import com.sk89q.worldguard.protection.regions.ProtectedRegionMBRConverter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -15,56 +15,93 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
+import org.khelekore.prtree.MBRConverter;
+import org.khelekore.prtree.PRTree;
 
 public class HTRegionManager {
 
     /**
      * List of protected regions.
      */
-    private Map<String, ProtectedRegion> regions;
+    private Map<String, ProtectedRegion> superRegions;
+    private Map<Integer, Region> regions;
+    private Map<Integer, BuildRegion> buildRegions;
+    
     private Map<ChunkVector, Set<ProtectedRegion>> chunkToRegions = new HashMap<>();
+    private MBRConverter<ProtectedRegion> converter = new ProtectedRegionMBRConverter();
+    
+    private static final int BRANCH_FACTOR = 30;
+    /**
+     * Priority R-tree.
+     */
+    private PRTree<ProtectedRegion> tree;
 
     public HTRegionManager() {
         regions = new HashMap<>();
+        regions = new TreeMap<>();
+        tree = new PRTree<>(converter, BRANCH_FACTOR);
+        superRegions = new HashMap<>();
+        buildRegions = new HashMap<>();
     }
 
-    public Map<String, ProtectedRegion> getRegions() {
+    public Map<String, ProtectedRegion> getSuperRegions() {
+        return superRegions;
+    }
+    
+    public Map<Integer, Region> getRegions() {
         return regions;
     }
-
-    public void setRegions(Map<String, ProtectedRegion> regions) {
-        this.regions = new HashMap<>(regions);
+    
+    public Map<Integer, BuildRegion> getBuildRegions() {
+        return buildRegions;
     }
 
-    public void addRegion(ProtectedRegion region) {
-        if (region instanceof ProtectedChunkoidRegion) {
-            this.regions.put(region.getId().toLowerCase(), region);
-            for (ChunkVector cv : ((ProtectedChunkoidRegion) region).getChunkoids()) {
-                Set<ProtectedRegion> ctr = chunkToRegions.get(cv);
-                if (ctr == null) {
-                    ctr = chunkToRegions.put(cv, new HashSet<ProtectedRegion>());
-                }
-                ctr.add(region);
+    public void setSuperRegions(Map<String, ProtectedRegion> regions) {
+        this.superRegions = new HashMap<>(regions);
+    }
+    
+    public void setRegions(Map<Integer, Region> regions) {
+        this.regions = new HashMap<>(regions);
+    }
+    
+    public void setBuildRegions(Map<Integer, BuildRegion> regions) {
+        this.buildRegions = new HashMap<>(regions);
+    }
+
+    public void addSuperRegion(SuperRegion region) {
+        this.superRegions.put(region.getName().toLowerCase(), region);
+        for (ChunkVector cv : ((ProtectedChunkRegion) region).getPartialChunks()) {
+            Set<ProtectedRegion> ctr = chunkToRegions.get(cv);
+            if (ctr == null) {
+                ctr = new HashSet<>();
+                chunkToRegions.put(cv, ctr);
             }
-        } else if (region instanceof ProtectedChunkRegion) {
-            this.regions.put(region.getId().toLowerCase(), region);
-            for (ChunkVector cv : ((ProtectedChunkRegion) region).getPartialChunks()) {
-                Set<ProtectedRegion> ctr = chunkToRegions.get(cv);
-                if (ctr == null) {
-                    ctr = new HashSet<>();
-                    chunkToRegions.put(cv, ctr);
-                }
-                ctr.add(region);
-            }
-        } else if (region instanceof GlobalProtectedRegion) {
-            this.regions.put(region.getId().toLowerCase(), region);
-        } else {
-            return;
+            ctr.add(region);
         }
-        try {
-            this.save();
-        } catch (ProtectionDatabaseException e) {
-            e.printStackTrace();
+    }
+    
+    public void addRegion(Region region) {
+        this.superRegions.put(region.getId(), region);
+        for (ChunkVector cv : ((ProtectedChunkRegion) region).getPartialChunks()) {
+            Set<ProtectedRegion> ctr = chunkToRegions.get(cv);
+            if (ctr == null) {
+                ctr = new HashSet<>();
+                chunkToRegions.put(cv, ctr);
+            }
+            ctr.add(region);
+        }
+    }
+    
+    public void addBuildRegion(Region region) {
+        this.superRegions.put(region.getId(), region);
+        for (ChunkVector cv : ((ProtectedChunkRegion) region).getPartialChunks()) {
+            Set<ProtectedRegion> ctr = chunkToRegions.get(cv);
+            if (ctr == null) {
+                ctr = new HashSet<>();
+                chunkToRegions.put(cv, ctr);
+            }
+            ctr.add(region);
         }
     }
 

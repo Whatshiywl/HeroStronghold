@@ -6,7 +6,6 @@ package multitallented.redcastlemedia.bukkit.herostronghold;
 import com.herocraftonline.heroes.Heroes;
 import com.herocraftonline.heroes.characters.Hero;
 import com.herocraftonline.heroes.characters.classes.HeroClass.ExperienceType;
-import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
 import java.io.IOException;
 import java.util.*;
 import java.util.logging.Logger;

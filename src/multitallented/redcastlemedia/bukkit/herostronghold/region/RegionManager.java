@@ -2,6 +2,7 @@ package multitallented.redcastlemedia.bukkit.herostronghold.region;
 
 import com.sk89q.worldedit.BlockVector;
 import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
+import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import java.io.File;
 import java.util.*;
 import java.util.logging.Logger;
@@ -26,11 +27,6 @@ import org.bukkit.inventory.ItemStack;
  * @author Multitallented
  */
 public class RegionManager extends HTRegionManager {
-    private Map<Location, Region> liveRegions = new HashMap<>();
-    private Map<Integer, Region> idRegions = new HashMap<>();
-    private ArrayList<Region> sortedRegions = new ArrayList<>();
-    private Map<String, SuperRegion> liveSuperRegions = new HashMap<>();
-    private ArrayList<SuperRegion> sortedSuperRegions = new ArrayList<>();
     private Map<String, RegionType> regionTypes = new HashMap<>();
     private Map<String, SuperRegionType> superRegionTypes = new HashMap<>();
     private HeroStronghold plugin;
@@ -40,7 +36,6 @@ public class RegionManager extends HTRegionManager {
     private HashMap<SuperRegion, HashSet<SuperRegion>> wars = new HashMap<>();
     private HashMap<String, PermSet> permSets = new HashMap<>();
     private HashSet<String> possiblePermSets = new HashSet<>();
-    private ArrayList<Region> sortedBuildRegions = new ArrayList<>();
     
     
     public RegionManager(HeroStronghold plugin, FileConfiguration config) {
@@ -276,17 +271,20 @@ public class RegionManager extends HTRegionManager {
             }
             warConfig.load(warFile);
             for (String key : warConfig.getKeys(false)) {
-                if (!liveSuperRegions.containsKey(key)) {
+                if (!hasRegion(key)) {
                     continue;
                 }
-                SuperRegion sr = liveSuperRegions.get(key);
-                HashSet<SuperRegion> tempSet = new HashSet<SuperRegion>();
-                for (String s : warConfig.getStringList(key)) {
-                    if (liveSuperRegions.containsKey(s)) {
-                        tempSet.add(liveSuperRegions.get(s));
+                ProtectedRegion pr = super.getRegion(key);
+                if (pr instanceof SuperRegion) {
+                SuperRegion sr = (SuperRegion) pr;
+                    HashSet<SuperRegion> tempSet = new HashSet<SuperRegion>();
+                    for (String s : warConfig.getStringList(key)) {
+                        if (hasRegion(s) && getRegion(s) instanceof SuperRegion) {
+                            tempSet.add((SuperRegion) getRegion(s));
+                        }
                     }
+                    wars.put(sr, tempSet);
                 }
-                wars.put(sr, tempSet);
             }
         } catch (Exception ioe) {
             Logger log = plugin.getLogger();
@@ -346,6 +344,7 @@ public class RegionManager extends HTRegionManager {
             dataConfig.set("owners", owners);
             dataConfig.set("members", new ArrayList<String>());
             dataConfig.save(dataFile);
+            int radius = getRegionType(type).getRawRadius();
             liveRegions.put(loc, new Region(i, loc, type, owners, new ArrayList<String>()));
             idRegions.put(i, liveRegions.get(loc));
             sortedBuildRegions.add(liveRegions.get(loc));
