@@ -345,29 +345,16 @@ public class RegionManager extends HTRegionManager {
             dataConfig.set("members", new ArrayList<String>());
             dataConfig.save(dataFile);
             int radius = getRegionType(type).getRawRadius();
-            liveRegions.put(loc, new Region(i, loc, type, owners, new ArrayList<String>()));
-            idRegions.put(i, liveRegions.get(loc));
-            sortedBuildRegions.add(liveRegions.get(loc));
-            if (sortedBuildRegions.size() > 1) {
-                Collections.sort(sortedBuildRegions, new Comparator<Region>() {
-
-                    @Override
-                    public int compare(Region o1, Region o2) {
-                        return (int) (-1 *(o1.getLocation().getX() + getRegionType(o1.getType()).getRawBuildRadius() - (o2.getLocation().getX() + getRegionType(o2.getType()).getRawBuildRadius())));
-                    }
-                });
-            }
-            sortedRegions.add(liveRegions.get(loc));
-            if (sortedRegions.size() > 1) {
-                Collections.sort(sortedRegions, new Comparator<Region>() {
-
-                    @Override
-                    public int compare(Region o1, Region o2) {
-                        return (int) (-1 *(o1.getLocation().getX() + getRegionType(o1.getType()).getRawRadius() - (o2.getLocation().getX() + getRegionType(o2.getType()).getRawRadius())));
-                    }
-                });
-            }
-            plugin.getServer().getPluginManager().callEvent(new RegionCreatedEvent(liveRegions.get(loc)));
+            int buildRadius = getRegionType(type).getRawBuildRadius();
+            BlockVector v1 = new BlockVector(loc.getX() + radius, loc.getY() + radius, loc.getZ() + radius);
+            BlockVector v2 = new BlockVector(loc.getX() - radius, loc.getY() - radius, loc.getZ() - radius);
+            Region r = new Region(i, loc, type, owners, new ArrayList<String>(), v1, v2, i +"");
+            v1 = new BlockVector(loc.getX() + buildRadius, loc.getY() + buildRadius, loc.getZ() + buildRadius);
+            v2 = new BlockVector(loc.getX() - buildRadius, loc.getY() - buildRadius, loc.getZ() - buildRadius);
+            BuildRegion br = new BuildRegion(i, v1, v2, i + "build");
+            this.addRegion(r);
+            this.addBuildRegion(br);
+            plugin.getServer().getPluginManager().callEvent(new RegionCreatedEvent(r));
         } catch (Exception ioe) {
             System.out.println("[HeroStronghold] unable to write new region to file " + i + ".yml");
             ioe.printStackTrace();
@@ -394,29 +381,17 @@ public class RegionManager extends HTRegionManager {
             dataConfig.set("owners", owners);
             dataConfig.set("members", members);
             dataConfig.save(dataFile);
-            liveRegions.put(loc, new Region(i, loc, type, owners, members));
-            idRegions.put(i, liveRegions.get(loc));
-            sortedRegions.add(liveRegions.get(loc));
-            sortedBuildRegions.add(liveRegions.get(loc));
-            if (sortedBuildRegions.size() > 1) {
-                Collections.sort(sortedBuildRegions, new Comparator<Region>() {
-
-                    @Override
-                    public int compare(Region o1, Region o2) {
-                        return (int) (-1 *(o1.getLocation().getX() + getRegionType(o1.getType()).getRawBuildRadius() - (o2.getLocation().getX() + getRegionType(o2.getType()).getRawBuildRadius())));
-                    }
-                });
-            }
-            if (sortedRegions.size() > 1) {
-                Collections.sort(sortedRegions, new Comparator<Region>() {
-
-                    @Override
-                    public int compare(Region o1, Region o2) {
-                        return (int) (-1 *(o1.getLocation().getX() + getRegionType(o1.getType()).getRawRadius() - (o2.getLocation().getX() + getRegionType(o2.getType()).getRawRadius())));
-                    }
-                });
-            }
-            plugin.getServer().getPluginManager().callEvent(new RegionCreatedEvent(liveRegions.get(loc)));
+            int radius = getRegionType(type).getRawRadius();
+            int buildRadius = getRegionType(type).getRawBuildRadius();
+            BlockVector v1 = new BlockVector(loc.getX() + radius, loc.getY() + radius, loc.getZ() + radius);
+            BlockVector v2 = new BlockVector(loc.getX() - radius, loc.getY() - radius, loc.getZ() - radius);
+            Region r = new Region(i, loc, type, owners, new ArrayList<String>(), v1, v2, i +"");
+            v1 = new BlockVector(loc.getX() + buildRadius, loc.getY() + buildRadius, loc.getZ() + buildRadius);
+            v2 = new BlockVector(loc.getX() - buildRadius, loc.getY() - buildRadius, loc.getZ() - buildRadius);
+            BuildRegion br = new BuildRegion(i, v1, v2, i + "build");
+            this.addRegion(r);
+            this.addBuildRegion(br);
+            plugin.getServer().getPluginManager().callEvent(new RegionCreatedEvent(r));
         } catch (Exception ioe) {
             System.out.println("[HeroStronghold] unable to write new region to file " + i + ".yml");
             ioe.printStackTrace();
@@ -518,7 +493,7 @@ public class RegionManager extends HTRegionManager {
     }
     
     public void destroySuperRegion(String name, boolean sendMessage) {
-        SuperRegion currentRegion = liveSuperRegions.get(name);
+        SuperRegion currentRegion = getSuperRegion(name);
         File dataFile = new File(plugin.getDataFolder() + "/superregions", name + ".yml");
         if (!dataFile.exists()) {
             System.out.println("[Herostronghold] Unable to destroy non-existent superregion " + name + ".yml");
@@ -548,7 +523,7 @@ public class RegionManager extends HTRegionManager {
     }
     
     public void checkIfDestroyedSuperRegion(Location loc) {
-        Set<String> regionsToDestroy = new HashSet<String>();
+        Set<String> regionsToDestroy = new HashSet<>();
         Region or = getRegion(loc);
         for (SuperRegion sr : this.getContainingSuperRegions(loc)) {
             if (or.getType().equals(getSuperRegionType(sr.getType()).getCentralStructure())) {
@@ -562,7 +537,7 @@ public class RegionManager extends HTRegionManager {
     }
     
     public ArrayList<Region> getContainedRegions(SuperRegion sr) {
-        ArrayList<Region> tempRegions = new ArrayList<Region>();
+        ArrayList<Region> tempRegions = new ArrayList<>();
         Location loc = sr.getLocation();
         double x = loc.getX();
         double y = loc.getY();
@@ -587,7 +562,7 @@ public class RegionManager extends HTRegionManager {
     public boolean hasAllRequiredRegions(SuperRegion sr) {
         Location loc = sr.getLocation();
         SuperRegionType srt = getSuperRegionType(sr.getType());
-        Map<String, Integer> reqs = new HashMap<String, Integer>();
+        Map<String, Integer> reqs = new HashMap<>();
         for (String s : srt.getRequirements().keySet()) {
             reqs.put(new String(s), new Integer(srt.getRequirement(s)));
         }
@@ -595,10 +570,10 @@ public class RegionManager extends HTRegionManager {
         double y = loc.getY();
         double z = loc.getZ();
         int radius = getSuperRegionType(sr.getType()).getRawRadius();
-        for (Region r : getSortedRegions()) {	  	
-            Location l = r.getLocation();  	
-            if (l.getX() + radius < x) { 	
-                break;	  	
+        for (Region r : getSortedRegions()) {
+            Location l = r.getLocation();
+            if (l.getX() + radius < x) {
+                break;
             }
             
             if (l.getX() - radius < x && l.getY() + radius > y && l.getY() - radius < y && 
